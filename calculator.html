@@ -122,6 +122,17 @@
         }
         
         //Keyboard support
+        function deleteLastDigit() {
+            if (resetDisplay) return; // Don't delete if we just displayed a result or operator
+            
+            if (currentValue.length === 1) {
+                currentValue = '0';
+            } else {
+                currentValue = currentValue.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
         document.addEventListener('keydown', function(event) {
             const key = event.key;
             
@@ -135,6 +146,10 @@
                 clearDisplay();
             } else if (key === '.') {
                 appendNumber('.');
+            } else if (key === 'Backspace') {
+                deleteLastDigit();
+            } else if (key === 'Delete') {
+                clearDisplay();
             }
         });
     </script>
