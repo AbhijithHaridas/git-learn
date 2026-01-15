@@ -43,8 +43,12 @@
         let resetDisplay = false;
 
         function updateDisplay() {
-            if (operator && resetDisplay) {
-                display.textContent = previousValue + ' ' + operator;
+            if (operator) {
+                if (resetDisplay) {
+                    display.textContent = previousValue + ' ' + operator;
+                } else {
+                    display.textContent = previousValue + ' ' + operator + ' ' + currentValue;
+                }
             } else {
                 display.textContent = currentValue;
             }
