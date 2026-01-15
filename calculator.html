@@ -120,6 +120,23 @@
             resetDisplay = true;
             updateDisplay();
         }
+        
+        //Keyboard support
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (/[0-9]/.test(key)) {
+                appendNumber(key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                appendOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+                clearDisplay();
+            } else if (key === '.') {
+                appendNumber('.');
+            }
+        });
     </script>
 </body>
 </html>
