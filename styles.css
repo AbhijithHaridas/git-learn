@@ -22,6 +22,15 @@ body {
     border: 1px solid #1a4d7a;
 }
 
+h2 {
+    color: #00d9ff;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
 .display {
     background: #0a1929;
     color: #00d9ff;
