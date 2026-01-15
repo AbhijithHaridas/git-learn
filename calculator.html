@@ -120,6 +120,38 @@
             resetDisplay = true;
             updateDisplay();
         }
+        
+        //Keyboard support
+        function deleteLastDigit() {
+            if (resetDisplay) return; // Don't delete if we just displayed a result or operator
+            
+            if (currentValue.length === 1) {
+                currentValue = '0';
+            } else {
+                currentValue = currentValue.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            if (/[0-9]/.test(key)) {
+                appendNumber(key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                appendOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+                clearDisplay();
+            } else if (key === '.') {
+                appendNumber('.');
+            } else if (key === 'Backspace') {
+                deleteLastDigit();
+            } else if (key === 'Delete') {
+                clearDisplay();
+            }
+        });
     </script>
 </body>
 </html>
