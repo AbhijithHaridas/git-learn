@@ -114,3 +114,8 @@ button:active {
 .zero {
     grid-column: span 2;
 }
+
+.display.error {
+    color: #ff4d4d;
+    font-size: 1.2em;
+}
