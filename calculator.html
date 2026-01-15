@@ -129,7 +129,7 @@
             <button class="number" onclick="appendNumber('1')">1</button>
             <button class="number" onclick="appendNumber('2')">2</button>
             <button class="number" onclick="appendNumber('3')">3</button>
-            <button class="operator" onclick="appendOperator('.')">.</button>
+            <button class="number" onclick="appendNumber('.')">.</button>
             
             <button class="number zero" onclick="appendNumber('0')">0</button>
             <button class="equals" onclick="calculate()">=</button>
@@ -144,7 +144,11 @@
         let resetDisplay = false;
 
         function updateDisplay() {
-            display.textContent = currentValue;
+            if (operator && resetDisplay) {
+                display.textContent = previousValue + ' ' + operator;
+            } else {
+                display.textContent = currentValue;
+            }
         }
 
         function clearDisplay() {
@@ -179,6 +183,7 @@
             previousValue = currentValue;
             operator = op;
             resetDisplay = true;
+            updateDisplay();
         }
 
         function calculate() {
