@@ -179,4 +179,8 @@ button:active {
         width: 320px;
         min-height: auto;
     }
+.display.error {
+    color: #ff4d4d;
+    font-size: 1.2em;
+}
 }

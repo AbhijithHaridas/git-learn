@@ -15,22 +15,22 @@
                 <button class="clear" onclick="clearDisplay()">C</button>
                 <button class="operator" onclick="appendOperator('/')">/</button>
                 <button class="operator" onclick="appendOperator('*')">×</button>
-                
+    
                 <button class="number" onclick="appendNumber('7')">7</button>
                 <button class="number" onclick="appendNumber('8')">8</button>
                 <button class="number" onclick="appendNumber('9')">9</button>
                 <button class="operator" onclick="appendOperator('-')">-</button>
-                
+    
                 <button class="number" onclick="appendNumber('4')">4</button>
                 <button class="number" onclick="appendNumber('5')">5</button>
                 <button class="number" onclick="appendNumber('6')">6</button>
                 <button class="operator" onclick="appendOperator('+')">+</button>
-                
+    
                 <button class="number" onclick="appendNumber('1')">1</button>
                 <button class="number" onclick="appendNumber('2')">2</button>
                 <button class="number" onclick="appendNumber('3')">3</button>
                 <button class="number" onclick="appendNumber('.')">.</button>
-                
+    
                 <button class="number zero" onclick="appendNumber('0')">0</button>
                 <button class="equals" onclick="calculate()">=</button>
             </div>
@@ -64,6 +64,7 @@
             previousValue = '';
             operator = '';
             resetDisplay = false;
+            display.classList.remove('error');
             updateDisplay();
         }
 
@@ -71,6 +72,7 @@
             if (resetDisplay) {
                 currentValue = num;
                 resetDisplay = false;
+                display.classList.remove('error');
             } else {
                 if (currentValue === '0' && num !== '.') {
                     currentValue = num;
@@ -96,7 +98,7 @@
 
         function calculate() {
             if (!operator || !previousValue) return;
-            
+
             let prev = parseFloat(previousValue);
             let current = parseFloat(currentValue);
             let result;
@@ -113,8 +115,12 @@
                     break;
                 case '/':
                     if (current === 0) {
-                        alert('Cannot divide by zero!');
-                        clearDisplay();
+                        currentValue = "Cannot divide by zero!";
+                        operator = '';
+                        previousValue = '';
+                        display.classList.add('error');
+                        resetDisplay = true;
+                        updateDisplay();
                         return;
                     }
                     result = prev / current;
