@@ -12,6 +12,7 @@
         <div class="display" id="display">0</div>
         <div class="buttons">
             <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="operator" onclick="toggleSign()">+/-</button>
             <button class="operator" onclick="appendOperator('/')">/</button>
             <button class="operator" onclick="appendOperator('*')">×</button>
             
@@ -55,6 +56,12 @@
             previousValue = '';
             operator = '';
             resetDisplay = false;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentValue === '0') return;
+            currentValue = (parseFloat(currentValue) * -1).toString();
             updateDisplay();
         }
 

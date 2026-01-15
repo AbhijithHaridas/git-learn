@@ -92,7 +92,6 @@ button:active {
 .clear {
     background: #e63946;
     color: #fff;
-    grid-column: span 2;
     border: 1px solid #ff4d5a;
 }
 
