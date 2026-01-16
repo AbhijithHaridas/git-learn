@@ -13,6 +13,7 @@
             <div class="display" id="display">0</div>
             <div class="buttons">
                 <button class="clear" onclick="clearDisplay()">C</button>
+                <button class="operator" onclick="calculatePercentage()">%</button>
                 <button class="operator" onclick="appendOperator('/')">/</button>
                 <button class="operator" onclick="appendOperator('*')">×</button>
     
@@ -65,6 +66,37 @@
             operator = '';
             resetDisplay = false;
             display.classList.remove('error');
+            updateDisplay();
+        }
+
+        function calculatePercentage() {
+            let current = parseFloat(currentValue);
+            
+            if (operator && previousValue) {
+                let prev = parseFloat(previousValue);
+                if (operator === '+' || operator === '-') {
+                    let val = (current / 100) * prev;
+                    if (Number.isInteger(val)) {
+                         currentValue = val.toString();
+                    } else {
+                         currentValue = val.toFixed(4).replace(/\.?0+$/, '');
+                    }
+                } else {
+                    let val = current / 100;
+                     if (Number.isInteger(val)) {
+                         currentValue = val.toString();
+                    } else {
+                         currentValue = val.toFixed(4).replace(/\.?0+$/, '');
+                    }
+                }
+            } else {
+                let val = current / 100;
+                if (Number.isInteger(val)) {
+                     currentValue = val.toString();
+                } else {
+                     currentValue = val.toFixed(4).replace(/\.?0+$/, '');
+                }
+            }
             updateDisplay();
         }
 
@@ -158,6 +190,8 @@
                 appendNumber(key);
             } else if (key === '+' || key === '-' || key === '*' || key === '/') {
                 appendOperator(key);
+            } else if (key === '%') {
+                calculatePercentage();
             } else if (key === 'Enter' || key === '=') {
                 calculate();
             } else if (key === 'Escape' || key.toLowerCase() === 'c') {
