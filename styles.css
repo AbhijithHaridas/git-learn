@@ -1,3 +1,65 @@
+:root {
+    /* Dark Theme (Default) */
+    --bg-body-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --bg-container: #0f3460;
+    --border-color: #1a4d7a;
+    --text-main: #e3f2fd;
+    --text-accent: #00d9ff;
+    --text-history-title: #00d9ff;
+    --bg-display: #0a1929;
+    --bg-history-item: #16213e;
+    --border-history-left: #00d9ff;
+    
+    /* Buttons */
+    --btn-number-bg: #1a4d7a;
+    --btn-number-text: #e3f2fd;
+    --btn-number-border: #2d6ca5;
+    --btn-number-hover: #2d6ca5;
+    
+    --btn-operator-bg: #00a8cc;
+    --btn-operator-text: #fff;
+    --btn-operator-border: #00c4e0;
+    --btn-operator-hover: #00c4e0;
+    
+    --btn-clear-bg: #e63946;
+    --btn-clear-text: #fff;
+    --btn-clear-border: #ff4d5a;
+    --btn-clear-hover: #ff4d5a;
+    
+    --btn-equals-bg: #06d6a0;
+    --btn-equals-text: #fff;
+    --btn-equals-border: #1be9b4;
+    --btn-equals-hover: #1be9b4;
+    
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme {
+    /* Light Theme Overrides */
+    --bg-body-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-container: #ffffff;
+    --border-color: #d1d9e6;
+    --text-main: #2d3436;
+    --text-accent: #0984e3;
+    --text-history-title: #0984e3;
+    --bg-display: #dfe6e9;
+    --bg-history-item: #f1f2f6;
+    --border-history-left: #0984e3;
+    
+    /* Buttons Light */
+    --btn-number-bg: #f1f2f6;
+    --btn-number-text: #2d3436;
+    --btn-number-border: #dfe6e9;
+    --btn-number-hover: #dfe6e9;
+    
+    --btn-operator-bg: #74b9ff;
+    --btn-operator-text: #ffffff;
+    --btn-operator-border: #0984e3;
+    --btn-operator-hover: #0984e3;
+
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -10,8 +72,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-body-gradient);
     padding: 20px;
+    transition: background 0.3s;
 }
 
 .main-container {
@@ -23,34 +86,54 @@ body {
 }
 
 .calculator {
-    background: #0f3460;
+    background: var(--bg-container);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px var(--shadow-color);
     width: 320px;
-    border: 1px solid #1a4d7a;
+    border: 1px solid var(--border-color);
+    position: relative; /* For theme toggle positioning */
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5em;
+    padding: 5px;
+    color: var(--text-accent);
+    transition: transform 0.3s;
+    z-index: 10;
+}
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
 }
 
 .history-panel {
-    background: #0f3460;
+    background: var(--bg-container);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px var(--shadow-color);
     width: 250px;
-    border: 1px solid #1a4d7a;
+    border: 1px solid var(--border-color);
     height: 100%;
     min-height: 400px;
-    color: #e3f2fd;
+    color: var(--text-main);
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
 }
 
 .history-panel h3 {
-    color: #00d9ff;
+    color: var(--text-history-title);
     text-align: center;
     margin-bottom: 15px;
     font-size: 1.2em;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #1a4d7a;
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
 }
 
@@ -61,15 +144,17 @@ body {
 }
 
 .history-item {
-    background: #16213e;
+    background: var(--bg-history-item);
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
-    border-left: 3px solid #00d9ff;
+    border-left: 3px solid var(--border-history-left);
     font-family: monospace;
     font-size: 1.1em;
     opacity: 0;
     animation: fadeIn 0.3s forwards;
+    color: var(--text-main);
+    transition: background 0.3s, color 0.3s;
 }
 
 @keyframes fadeIn {
@@ -77,7 +162,7 @@ body {
 }
 
 h2 {
-    color: #00d9ff;
+    color: var(--text-accent);
     text-align: center;
     margin-bottom: 15px;
     font-size: 1.5em;
@@ -86,8 +171,8 @@ h2 {
 }
 
 .display {
-    background: #0a1929;
-    color: #00d9ff;
+    background: var(--bg-display);
+    color: var(--text-accent);
     font-size: 2em;
     padding: 20px;
     text-align: right;
@@ -96,7 +181,8 @@ h2 {
     min-height: 60px;
     word-wrap: break-word;
     word-break: break-all;
-    border: 1px solid #1a4d7a;
+    border: 1px solid var(--border-color);
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
 
 .buttons {
@@ -124,45 +210,45 @@ button:active {
 }
 
 .number {
-    background: #1a4d7a;
-    color: #e3f2fd;
-    border: 1px solid #2d6ca5;
+    background: var(--btn-number-bg);
+    color: var(--btn-number-text);
+    border: 1px solid var(--btn-number-border);
 }
 
 .number:hover {
-    background: #2d6ca5;
+    background: var(--btn-number-hover);
 }
 
 .operator {
-    background: #00a8cc;
-    color: #fff;
-    border: 1px solid #00c4e0;
+    background: var(--btn-operator-bg);
+    color: var(--btn-operator-text);
+    border: 1px solid var(--btn-operator-border);
 }
 
 .operator:hover {
-    background: #00c4e0;
+    background: var(--btn-operator-hover);
 }
 
 .clear {
-    background: #e63946;
-    color: #fff;
+    background: var(--btn-clear-bg);
+    color: var(--btn-clear-text);
     grid-column: span 2;
-    border: 1px solid #ff4d5a;
+    border: 1px solid var(--btn-clear-border);
 }
 
 .clear:hover {
-    background: #ff4d5a;
+    background: var(--btn-clear-hover);
 }
 
 .equals {
-    background: #06d6a0;
-    color: #fff;
+    background: var(--btn-equals-bg);
+    color: var(--btn-equals-text);
     grid-column: span 2;
-    border: 1px solid #1be9b4;
+    border: 1px solid var(--btn-equals-border);
 }
 
 .equals:hover {
-    background: #1be9b4;
+    background: var(--btn-equals-hover);
 }
 
 .zero {
@@ -179,8 +265,8 @@ button:active {
         width: 320px;
         min-height: auto;
     }
-.display.error {
-    color: #ff4d4d;
-    font-size: 1.2em;
-}
+    .display.error {
+        color: #ff4d4d;
+        font-size: 1.2em;
+    }
 }
