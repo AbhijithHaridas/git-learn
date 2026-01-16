@@ -37,92 +37,81 @@
 
     <script>
         let display = document.getElementById('display');
-        let currentValue = '0';
-        let previousValue = '';
-        let operator = '';
-        let resetDisplay = false;
+        let expression = '';
 
         function updateDisplay() {
-            if (operator) {
-                if (resetDisplay) {
-                    display.textContent = previousValue + ' ' + operator;
-                } else {
-                    display.textContent = previousValue + ' ' + operator + ' ' + currentValue;
-                }
-            } else {
-                display.textContent = currentValue;
-            }
+            display.textContent = expression || '0';
         }
 
         function clearDisplay() {
-            currentValue = '0';
-            previousValue = '';
-            operator = '';
-            resetDisplay = false;
+            expression = '';
             updateDisplay();
         }
 
         function appendNumber(num) {
-            if (resetDisplay) {
-                currentValue = num;
-                resetDisplay = false;
+            if (expression === '0' && num !== '.') {
+                expression = num;
             } else {
-                if (currentValue === '0' && num !== '.') {
-                    currentValue = num;
-                } else {
-                    if (num === '.' && currentValue.includes('.')) {
+                if (num === '.') {
+                    const operators = ['+', '-', '*', '/'];
+                    const lastChar = expression.slice(-1);
+                    if (expression === '' || operators.includes(lastChar)) {
+                        expression += '0.';
+                        updateDisplay();
                         return;
                     }
-                    currentValue += num;
+                    let splitString = expression.split(/[\+\-\*\/]/);
+                    let lastNum = splitString[splitString.length - 1];
+                    if (lastNum.includes('.')) return;
                 }
+                expression += num;
             }
             updateDisplay();
         }
 
         function appendOperator(op) {
-            if (operator && !resetDisplay) {
-                calculate();
+            const operators = ['+', '-', '*', '/'];
+            if (expression === '' && op === '-') {
+                expression += op;
+                updateDisplay();
+                return;
             }
-            previousValue = currentValue;
-            operator = op;
-            resetDisplay = true;
+            if (expression === '') return;
+
+            const lastChar = expression.slice(-1);
+            if (operators.includes(lastChar)) {
+                if (op === '-' && lastChar !== '-') {
+                    expression += op;
+                } else {
+                    while (operators.includes(expression.slice(-1))) {
+                        expression = expression.slice(0, -1);
+                    }
+                    expression += op;
+                }
+            } else {
+                expression += op;
+            }
             updateDisplay();
         }
 
         function calculate() {
-            if (!operator || !previousValue) return;
-            
-            let prev = parseFloat(previousValue);
-            let current = parseFloat(currentValue);
-            let result;
-
-            switch(operator) {
-                case '+':
-                    result = prev + current;
-                    break;
-                case '-':
-                    result = prev - current;
-                    break;
-                case '*':
-                    result = prev * current;
-                    break;
-                case '/':
-                    if (current === 0) {
-                        alert('Cannot divide by zero!');
-                        clearDisplay();
-                        return;
-                    }
-                    result = prev / current;
-                    break;
-                default:
-                    return;
-            }
-
-            currentValue = result.toString();
-            operator = '';
-            previousValue = '';
-            resetDisplay = true;
-            updateDisplay();
+            try {
+                if (!expression) return;
+                let evalExpr = expression;
+                const operators = ['+', '-', '*', '/'];
+                while (operators.includes(evalExpr.slice(-1))) {
+                    evalExpr = evalExpr.slice(0, -1);
+                }
+                
+                let result = new Function('return ' + evalExpr)();
+                if (!isFinite(result)) {
+                    alert('Cannot divide by zero!');
+                    expression = '';
+                } else {
+                    expression = result.toString();
+                }
+                updateDisplay();
+            } catch (e) {}
         }
     </script>
 </body>
