@@ -94,9 +94,15 @@ h2 {
     border-radius: 5px;
     margin-bottom: 10px;
     min-height: 60px;
-    word-wrap: break-word;
-    word-break: break-all;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
     border: 1px solid #1a4d7a;
+    transition: font-size 0.2s;
+
+    /* Custom Scrollbar for Webkit */
+    scrollbar-width: thin;
+    scrollbar-color: #1a4d7a #0a1929;
 }
 
 .buttons {
