@@ -9,6 +9,7 @@
 <body>
     <div class="main-container">
         <div class="calculator">
+            <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
             <h2>Calculator</h2>
             <div class="display" id="display">0</div>
             <div class="buttons">
@@ -194,6 +195,31 @@
                 historyList.appendChild(li);
             });
         }
+
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                localStorage.setItem('theme', '');
+                btn.textContent = '☀️';
+            } else {
+                body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light-theme');
+                btn.textContent = '🌙';
+            }
+        }
+
+        // Initialize Theme
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light-theme') {
+                document.body.classList.add('light-theme');
+                document.querySelector('.theme-toggle').textContent = '🌙';
+            }
+        })();
     </script>
 </body>
 </html>
