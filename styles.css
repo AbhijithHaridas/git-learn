@@ -143,14 +143,13 @@ button:active {
     background: #00c4e0;
 }
 
-.clear {
+.clear-entry, .all-clear {
     background: #e63946;
     color: #fff;
-    grid-column: span 2;
     border: 1px solid #ff4d5a;
 }
 
-.clear:hover {
+.clear-entry:hover, .all-clear:hover {
     background: #ff4d5a;
 }
 
