@@ -52,11 +52,14 @@
         let resetDisplay = false;
 
         function updateDisplay() {
+            let valueToDisplay;
             if (operator && resetDisplay) {
-                display.textContent = previousValue + ' ' + operator;
+                valueToDisplay = formatNumber(previousValue) + ' ' + operator;
             } else {
-                display.textContent = currentValue;
+                valueToDisplay = formatNumber(currentValue);
             }
+            display.textContent = valueToDisplay;
+            adjustFontSize(valueToDisplay);
         }
 
         function clearDisplay() {
@@ -65,6 +68,7 @@
             operator = '';
             resetDisplay = false;
             display.classList.remove('error');
+            display.style.fontSize = '2em'; // Reset font size
             updateDisplay();
         }
 
@@ -130,7 +134,11 @@
             }
 
             // Add to history
-            addToHistory(prev + ' ' + operator + ' ' + current, result);
+            let formattedPrev = formatNumber(previousValue);
+            let formattedCurrent = formatNumber(currentValue);
+            let formattedResult = formatNumber(result.toString());
+            
+            addToHistory(formattedPrev + ' ' + operator + ' ' + formattedCurrent, formattedResult);
 
             currentValue = result.toString();
             operator = '';
@@ -193,6 +201,43 @@
                 li.textContent = entry;
                 historyList.appendChild(li);
             });
+        }
+
+        function formatNumber(numStr) {
+            if (!numStr || numStr === "Cannot divide by zero!" || numStr === "Error") return numStr;
+            
+            // Check if it's an operator display (e.g. "12 +")
+            if (isNaN(parseFloat(numStr))) return numStr;
+
+            const num = parseFloat(numStr);
+            
+            // Handle scientific notation for very large/small numbers
+            if (Math.abs(num) >= 1e12 || (Math.abs(num) > 0 && Math.abs(num) < 1e-9)) {
+                return num.toExponential(4);
+            }
+            
+            // Handle long decimals
+            if (numStr.includes('.')) {
+                const parts = numStr.split('.');
+                if (parts[1].length > 10) {
+                     return parseFloat(num.toFixed(10)).toString();
+                }
+            }
+            
+            return numStr;
+        }
+
+        function adjustFontSize(text) {
+            if (!text) return;
+            const length = text.length;
+            
+            if (length > 18) {
+                display.style.fontSize = '1em';
+            } else if (length > 12) {
+                display.style.fontSize = '1.5em';
+            } else {
+                display.style.fontSize = '2em';
+            }
         }
     </script>
 </body>
