@@ -11,6 +11,15 @@ body {
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 20px;
+}
+
+.main-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .calculator {
@@ -20,6 +29,51 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     width: 320px;
     border: 1px solid #1a4d7a;
+}
+
+.history-panel {
+    background: #0f3460;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 250px;
+    border: 1px solid #1a4d7a;
+    height: 100%;
+    min-height: 400px;
+    color: #e3f2fd;
+}
+
+.history-panel h3 {
+    color: #00d9ff;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #1a4d7a;
+    padding-bottom: 10px;
+}
+
+.history-list {
+    list-style: none;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: #16213e;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #00d9ff;
+    font-family: monospace;
+    font-size: 1.1em;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
 }
 
 h2 {
@@ -112,4 +166,20 @@ button:active {
 
 .zero {
     grid-column: span 2;
+}
+
+@media (max-width: 650px) {
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .history-panel {
+        width: 320px;
+        min-height: auto;
+    }
+.display.error {
+    color: #ff4d4d;
+    font-size: 1.2em;
+}
 }
