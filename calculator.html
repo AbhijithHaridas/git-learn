@@ -10,6 +10,9 @@
     <div class="main-container">
         <div class="calculator">
             <h2>Calculator</h2>
+            <button id="settingsBtn" class="settings-btn" aria-label="Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
             <div class="display" id="display">0</div>
             <div class="buttons">
                 <button class="clear" onclick="clearDisplay()">C</button>
@@ -44,6 +47,31 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="settings-modal">
+            <h3>Settings</h3>
+            
+            <div class="setting-item">
+                <span>Sound Effects</span>
+                <label class="switch">
+                    <input type="checkbox" id="soundToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <span>Haptic Feedback</span>
+                <label class="switch">
+                    <input type="checkbox" id="hapticToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <button class="close-modal-btn" id="closeModalBtn">Close</button>
+        </div>
+    </div>
+
     <script>
         let display = document.getElementById('display');
         let currentValue = '0';
@@ -60,6 +88,7 @@
         }
 
         function clearDisplay() {
+            feedbackManager.trigger('clear');
             currentValue = '0';
             previousValue = '';
             operator = '';
@@ -69,6 +98,7 @@
         }
 
         function appendNumber(num) {
+            feedbackManager.trigger('number');
             if (resetDisplay) {
                 currentValue = num;
                 resetDisplay = false;
@@ -87,6 +117,7 @@
         }
 
         function appendOperator(op) {
+            feedbackManager.trigger('operator');
             if (operator && !resetDisplay) {
                 calculate();
             }
@@ -130,6 +161,7 @@
             }
 
             // Add to history
+            feedbackManager.trigger('calculate');
             addToHistory(prev + ' ' + operator + ' ' + current, result);
 
             currentValue = result.toString();
@@ -194,6 +226,142 @@
                 historyList.appendChild(li);
             });
         }
+
+        // Feedback System
+        const feedbackManager = {
+            audioContext: null,
+            soundEnabled: false,
+            hapticEnabled: false,
+            
+            init() {
+                // Load settings
+                this.soundEnabled = localStorage.getItem('calc_sound') === 'true';
+                this.hapticEnabled = localStorage.getItem('calc_haptic') === 'true';
+                
+                // Update UI
+                document.getElementById('soundToggle').checked = this.soundEnabled;
+                document.getElementById('hapticToggle').checked = this.hapticEnabled;
+                
+                // Listeners
+                document.getElementById('soundToggle').addEventListener('change', (e) => {
+                    this.soundEnabled = e.target.checked;
+                    localStorage.setItem('calc_sound', this.soundEnabled);
+                    if (this.soundEnabled && !this.audioContext) {
+                        this.initAudio();
+                    }
+                });
+                
+                document.getElementById('hapticToggle').addEventListener('change', (e) => {
+                    this.hapticEnabled = e.target.checked;
+                    localStorage.setItem('calc_haptic', this.hapticEnabled);
+                });
+                
+                // Init Audio Context on first interaction if enabled
+                document.addEventListener('click', () => {
+                    if (this.soundEnabled && !this.audioContext) {
+                        this.initAudio();
+                    }
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                }, { once: true });
+            },
+            
+            initAudio() {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    this.audioContext = new AudioContext();
+                }
+            },
+            
+            trigger(type) {
+                this.playHaptic();
+                this.playSound(type);
+            },
+            
+            playHaptic() {
+                if (!this.hapticEnabled || !navigator.vibrate) return;
+                
+                // Short vibration for light feedback
+                navigator.vibrate(5); 
+            },
+            
+            playSound(type) {
+                if (!this.soundEnabled || !this.audioContext) return;
+                
+                const osc = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                osc.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                const now = this.audioContext.currentTime;
+                
+                // Sound profiles
+                switch(type) {
+                    case 'number':
+                        osc.frequency.setValueAtTime(600, now);
+                        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                        gainNode.gain.setValueAtTime(0.1, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        osc.start(now);
+                        osc.stop(now + 0.1);
+                        break;
+                        
+                    case 'operator':
+                        osc.frequency.setValueAtTime(400, now);
+                        osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+                        gainNode.gain.setValueAtTime(0.1, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                        osc.start(now);
+                        osc.stop(now + 0.15);
+                        break;
+                        
+                    case 'clear':
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(300, now);
+                        osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                        gainNode.gain.setValueAtTime(0.15, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                        osc.start(now);
+                        osc.stop(now + 0.2);
+                        break;
+                        
+                    case 'calculate':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(500, now);
+                        osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+                        gainNode.gain.setValueAtTime(0.1, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        osc.start(now);
+                        osc.stop(now + 0.3);
+                        break;
+                }
+            }
+        };
+
+        // Modal Logic
+        const settingsBtn = document.getElementById('settingsBtn');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const settingsModal = document.querySelector('.settings-modal');
+
+        settingsBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+            }
+        });
+
+        // Initialize Settings
+        feedbackManager.init();
     </script>
 </body>
 </html>
