@@ -39,115 +39,111 @@
         <div class="history-panel">
             <h3>History</h3>
             <ul class="history-list" id="historyList">
-                <!-- History items will be added here -->
-            </ul>
+                </ul>
         </div>
     </div>
 
     <script>
         let display = document.getElementById('display');
-        let currentValue = '0';
-        let previousValue = '';
-        let operator = '';
-        let resetDisplay = false;
+        let expression = '';
 
         function updateDisplay() {
-            if (operator && resetDisplay) {
-                display.textContent = previousValue + ' ' + operator;
-            } else {
-                display.textContent = currentValue;
-            }
+            display.textContent = expression || '0';
         }
 
         function clearDisplay() {
-            currentValue = '0';
-            previousValue = '';
-            operator = '';
-            resetDisplay = false;
+            expression = '';
             display.classList.remove('error');
             updateDisplay();
         }
 
         function appendNumber(num) {
-            if (resetDisplay) {
-                currentValue = num;
-                resetDisplay = false;
-                display.classList.remove('error');
+            // Prevent multiple decimals in the same number segment
+            if (num === '.') {
+                const operators = ['+', '-', '*', '/'];
+                const parts = expression.split(/[\+\-\*\/]/);
+                const currentPart = parts[parts.length - 1];
+                if (currentPart.includes('.')) return;
+            }
+            
+            if (expression === '0' && num !== '.') {
+                expression = num;
             } else {
-                if (currentValue === '0' && num !== '.') {
-                    currentValue = num;
-                } else {
-                    if (num === '.' && currentValue.includes('.')) {
-                        return;
-                    }
-                    currentValue += num;
-                }
+                expression += num;
             }
             updateDisplay();
         }
 
         function appendOperator(op) {
-            if (operator && !resetDisplay) {
-                calculate();
+            const operators = ['+', '-', '*', '/'];
+            
+            // Allow negative sign at start
+            if (expression === '' && op === '-') {
+                expression += op;
+                updateDisplay();
+                return;
             }
-            previousValue = currentValue;
-            operator = op;
-            resetDisplay = true;
+            
+            if (expression === '') return;
+
+            const lastChar = expression.slice(-1);
+        
+            if (operators.includes(lastChar)) {
+                if (op === '-' && lastChar !== '-') {
+                    expression += op;
+                } else {
+                    // Replace the operator
+                    expression = expression.slice(0, -1) + op;
+                }
+            } else {
+                expression += op;
+            }
             updateDisplay();
         }
 
         function calculate() {
-            if (!operator || !previousValue) return;
+            try {
+                if (!expression) return;
+                
+                // Clean trailing operators before calculating
+                let evalExpr = expression;
+                const operators = ['+', '-', '*', '/'];
+                while (operators.includes(evalExpr.slice(-1))) {
+                    evalExpr = evalExpr.slice(0, -1);
+                }
 
-            let prev = parseFloat(previousValue);
-            let current = parseFloat(currentValue);
-            let result;
-
-            switch(operator) {
-                case '+':
-                    result = prev + current;
-                    break;
-                case '-':
-                    result = prev - current;
-                    break;
-                case '*':
-                    result = prev * current;
-                    break;
-                case '/':
-                    if (current === 0) {
-                        currentValue = "Cannot divide by zero!";
-                        operator = '';
-                        previousValue = '';
-                        display.classList.add('error');
-                        resetDisplay = true;
+                // Safe evaluation
+                let result = new Function('return ' + evalExpr)();
+                
+                if (!isFinite(result)) {
+                    display.classList.add('error');
+                    expression = 'Cannot divide by zero!';
+                    updateDisplay();
+                    // Reset after a delay or next click
+                    setTimeout(() => { 
+                        expression = ''; 
+                        display.classList.remove('error');
                         updateDisplay();
-                        return;
-                    }
-                    result = prev / current;
-                    break;
-                default:
+                    }, 2000);
                     return;
+                }
+
+                // Add to history
+                addToHistory(evalExpr, result);
+
+                // Update expression to result for next calculation
+                expression = result.toString();
+                updateDisplay();
+
+            } catch (e) {
+                display.textContent = 'Error';
+                expression = '';
             }
-
-            // Add to history
-            addToHistory(prev + ' ' + operator + ' ' + current, result);
-
-            currentValue = result.toString();
-            operator = '';
-            previousValue = '';
-            resetDisplay = true;
-            updateDisplay();
         }
         
-        //Keyboard support
-        function deleteLastDigit() {
-            if (resetDisplay) return; // Don't delete if we just displayed a result or operator
-            
-            if (currentValue.length === 1) {
-                currentValue = '0';
-            } else {
-                currentValue = currentValue.slice(0, -1);
-            }
+        // Keyboard support (Merged from Main Branch)
+        function deleteLastChar() {
+            expression = expression.slice(0, -1);
             updateDisplay();
         }
 
@@ -159,25 +155,26 @@
             } else if (key === '+' || key === '-' || key === '*' || key === '/') {
                 appendOperator(key);
             } else if (key === 'Enter' || key === '=') {
+                event.preventDefault(); // Prevent accidental form submissions
                 calculate();
             } else if (key === 'Escape' || key.toLowerCase() === 'c') {
                 clearDisplay();
             } else if (key === '.') {
                 appendNumber('.');
             } else if (key === 'Backspace') {
-                deleteLastDigit();
+                deleteLastChar();
             } else if (key === 'Delete') {
                 clearDisplay();
             }
         });
 
-        // History Feature
+        // History Feature 
         let history = [];
         const MAX_HISTORY = 10;
         const historyList = document.getElementById('historyList');
 
-        function addToHistory(expression, result) {
-            const entry = `${expression} = ${result}`;
+        function addToHistory(expr, res) {
+            const entry = `${expr} = ${res}`;
             history.unshift(entry);
             if (history.length > MAX_HISTORY) {
                 history.pop();
