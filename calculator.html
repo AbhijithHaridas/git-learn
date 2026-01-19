@@ -106,11 +106,62 @@
             try {
                 if (!expression) return;
                 
-                // Clean trailing operators before calculating
+                // Prepare expression for calculating
                 let evalExpr = expression;
                 const operators = ['+', '-', '*', '/'];
-                while (operators.includes(evalExpr.slice(-1))) {
-                    evalExpr = evalExpr.slice(0, -1);
+
+                // If expression ends with an operator, duplicate the last entered number
+                // Example: "5-" -> use "5-5"; "12+3-" -> use "12+3-3"
+                const lastChar = expression.slice(-1);
+                if (operators.includes(lastChar)) {
+                    // Find the last operator position that is not a unary minus
+                    let lastOpIndex = -1;
+                    for (let i = expression.length - 1; i >= 0; i--) {
+                        const ch = expression[i];
+                        if (operators.includes(ch)) {
+                            if (ch === '-' && (i === 0 || operators.includes(expression[i - 1]))) {
+                                // unary minus, skip
+                                continue;
+                            }
+                            lastOpIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (lastOpIndex !== -1) {
+                        const leftExpr = expression.slice(0, lastOpIndex);
+                        const op = expression[lastOpIndex];
+
+                        // Extract the last number from leftExpr (handles negative numbers)
+                        const numMatch = leftExpr.match(/(-?\d+(?:\.\d+)?)$/);
+                        let lastNumber = '0';
+                        if (numMatch) {
+                            lastNumber = numMatch[0];
+                            // If leftExpr is just the last number (no preceding expr), preserve it as-is
+                        } else if (leftExpr !== '') {
+                            // Fallback: use whole leftExpr if no number found
+                            lastNumber = leftExpr;
+                        } else {
+                            // Nothing to duplicate; fall back to trimming trailing operators
+                            let tmp = evalExpr;
+                            while (operators.includes(tmp.slice(-1))) tmp = tmp.slice(0, -1);
+                            evalExpr = tmp;
+                        }
+
+                        if (lastNumber !== '') {
+                            evalExpr = leftExpr + op + lastNumber;
+                        }
+                    } else {
+                        // No valid operator found (e.g., expression is just "-"), trim trailing operators
+                        while (operators.includes(evalExpr.slice(-1))) {
+                            evalExpr = evalExpr.slice(0, -1);
+                        }
+                    }
+                } else {
+                    // Regular case: remove any accidental trailing operators
+                    while (operators.includes(evalExpr.slice(-1))) {
+                        evalExpr = evalExpr.slice(0, -1);
+                    }
                 }
 
                 // Safe evaluation
