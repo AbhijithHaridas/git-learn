@@ -146,7 +146,18 @@ button:active {
 .clear {
     background: #e63946;
     color: #fff;
+
     border: 1px solid #ff4d5a;
+}
+
+.backspace {
+    background: #e63946;
+    color: #fff;
+    border: 1px solid #ff4d5a;
+}
+
+.backspace:hover {
+    background: #ff4d5a;
 }
 
 .clear:hover {
