@@ -60,7 +60,6 @@
         }
 
         function appendNumber(num) {
-            // Prevent multiple decimals in the same number segment
             if (num === '.') {
                 const operators = ['+', '-', '*', '/'];
                 const parts = expression.split(/[\+\-\*\/]/);
@@ -79,7 +78,6 @@
         function appendOperator(op) {
             const operators = ['+', '-', '*', '/'];
             
-            // Allow negative sign at start
             if (expression === '' && op === '-') {
                 expression += op;
                 updateDisplay();
@@ -94,7 +92,7 @@
                 if (op === '-' && lastChar !== '-') {
                     expression += op;
                 } else {
-                    // Replace the operator
+               
                     expression = expression.slice(0, -1) + op;
                 }
             } else {
@@ -120,6 +118,51 @@
             return expr;
         }
 
+        function trimTrailingOperators(str) {
+            const ops = ['+', '-', '*', '/'];
+            let s = str;
+            while (s.length && ops.includes(s.slice(-1))) {
+                s = s.slice(0, -1);
+            }
+            return s;
+        }
+
+        function findLastOperatorIndex(expr) {
+            const ops = ['+', '-', '*', '/'];
+            for (let i = expr.length - 1; i >= 0; i--) {
+                const currentChar = expr[i];
+                if (ops.includes(currentChar)) {
+                    if (currentChar === '-' && (i === 0 || ops.includes(expr[i - 1]))) {
+                        continue;
+                    }
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function extractLastNumber(str) {
+            const match = str.match(/(-?\d+(?:\.\d+)?)$/);
+            return match ? match[0] : '';
+        }
+
+        function handleTrailingOperator(expr) {
+            const lastOpIndex = findLastOperatorIndex(expr);
+            if (lastOpIndex === -1) return trimTrailingOperators(expr);
+
+            const leftExpr = expr.slice(0, lastOpIndex);
+            const op = expr[lastOpIndex];
+
+            if (leftExpr === '') return trimTrailingOperators(expr);
+
+            const lastNumber = extractLastNumber(leftExpr) || leftExpr;
+            if (lastNumber !== '') {
+                return leftExpr + op + lastNumber;
+            }
+
+            return trimTrailingOperators(expr);
+        }
+
         function calculate() {
             try {
                 if (!expression) return;
@@ -129,18 +172,23 @@
 
                 // Clean trailing operators before calculating
                 const operators = ['+', '-', '*', '/'];
-                while (operators.includes(evalExpr.slice(-1))) {
-                    evalExpr = evalExpr.slice(0, -1);
+
+              
+                const lastChar = expression.slice(-1);
+                if (operators.includes(lastChar)) {
+                    evalExpr = handleTrailingOperator(expression);
+                } else {
+                    evalExpr = trimTrailingOperators(evalExpr);
                 }
 
-                // Safe evaluation
+              
                 let result = new Function('return ' + evalExpr)();
                 
                 if (!isFinite(result)) {
                     display.classList.add('error');
                     expression = 'Cannot divide by zero!';
                     updateDisplay();
-                    // Reset after a delay or next click
+                   
                     setTimeout(() => { 
                         expression = ''; 
                         display.classList.remove('error');
@@ -149,10 +197,12 @@
                     return;
                 }
 
+                
                 // Add to history
-                addToHistory(expression, result);
+                const historyExpr = expression.includes('%') ? expression : evalExpr;
+                addToHistory(historyExpr, result);
 
-                // Update expression to result for next calculation
+                
                 expression = result.toString();
                 updateDisplay();
 
@@ -162,7 +212,7 @@
             }
         }
         
-        // Keyboard support (Merged from Main Branch)
+        
         function deleteLastChar() {
             expression = expression.slice(0, -1);
             updateDisplay();
@@ -176,7 +226,7 @@
             } else if (key === '+' || key === '-' || key === '*' || key === '/') {
                 appendOperator(key);
             } else if (key === 'Enter' || key === '=') {
-                event.preventDefault(); // Prevent accidental form submissions
+                event.preventDefault();
                 calculate();
             } else if (key === 'Escape' || key.toLowerCase() === 'c') {
                 clearDisplay();
